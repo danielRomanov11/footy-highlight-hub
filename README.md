@@ -8,7 +8,7 @@ A public web app that aggregates **official football highlights** from trusted Y
 - **Supabase** (Postgres) — video metadata cache with RLS
 - **YouTube Data API v3** — channel uploads ingestion
 - **Cheerio** — FIFA/UEFA website adapters
-- **Vercel** — hosting + Cron (every 2 hours)
+- **Vercel** — hosting + Cron (daily at 5:00 PM UTC)
 
 ## Architecture
 
@@ -86,7 +86,7 @@ curl -H "Authorization: Bearer YOUR_CRON_SECRET" http://localhost:3000/api/cron/
 
 1. Push to GitHub and import the repo in Vercel
 2. Add all env vars from `.env.example` in Vercel project settings
-3. Deploy — `vercel.json` configures cron at `/api/cron/ingest`
+3. Deploy — `vercel.json` configures cron at `/api/cron/ingest` (daily at 5:00 PM UTC)
 4. Vercel automatically sends `Authorization: Bearer <CRON_SECRET>` to cron routes when `CRON_SECRET` is set
 
 ## API
