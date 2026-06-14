@@ -37,7 +37,8 @@ const en = {
     description: "Official match highlights from FIFA, UEFA, Fox Soccer, and top leagues.",
     emptyConfig:
       "Configure Supabase environment variables and run the migration to see highlights.",
-    emptyVideos: "No highlights yet. Run the ingest cron job to pull videos from official channels.",
+    emptyVideos:
+      "No highlights yet. Ingest runs automatically when someone visits the site (about every 2 hours).",
   },
   browse: {
     eyebrow: "Competitions",

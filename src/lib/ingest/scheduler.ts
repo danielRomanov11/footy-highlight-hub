@@ -1,0 +1,72 @@
+import { createServiceClient } from "@/lib/supabase/server";
+import { runIngestion, type IngestResult } from "@/lib/ingest/pipeline";
+
+const DEFAULT_INTERVAL_HOURS = 2;
+
+function getIngestIntervalHours(): number {
+  const raw = process.env.INGEST_INTERVAL_HOURS;
+  if (!raw) return DEFAULT_INTERVAL_HOURS;
+
+  const parsed = Number(raw);
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    return DEFAULT_INTERVAL_HOURS;
+  }
+
+  return parsed;
+}
+
+export type ScheduledIngestSkipReason = "not_due" | "in_progress";
+
+export async function tryStartScheduledIngestion(): Promise<
+  { shouldRun: true } | { shouldRun: false; reason: ScheduledIngestSkipReason }
+> {
+  const supabase = createServiceClient();
+  const intervalHours = getIngestIntervalHours();
+
+  const { data: acquired, error } = await supabase.rpc("try_acquire_ingest_lock", {
+    p_interval: `${intervalHours} hours`,
+  });
+
+  if (error) throw error;
+  if (acquired) return { shouldRun: true };
+
+  const { data: state, error: stateError } = await supabase
+    .from("ingest_state")
+    .select("last_run_at, last_run_started_at")
+    .eq("id", 1)
+    .single();
+
+  if (stateError) throw stateError;
+
+  const thresholdMs = intervalHours * 60 * 60 * 1000;
+  const lastRunAt = state.last_run_at ? new Date(state.last_run_at).getTime() : 0;
+  const recentlyCompleted = lastRunAt > 0 && Date.now() - lastRunAt < thresholdMs;
+
+  if (recentlyCompleted) {
+    return { shouldRun: false, reason: "not_due" };
+  }
+
+  return { shouldRun: false, reason: "in_progress" };
+}
+
+async function completeScheduledIngestion(status: "success" | "error", error?: string) {
+  const supabase = createServiceClient();
+  const { error: rpcError } = await supabase.rpc("complete_ingest_run", {
+    p_status: status,
+    p_error: error ?? null,
+  });
+
+  if (rpcError) throw rpcError;
+}
+
+export async function runScheduledIngestion(): Promise<IngestResult> {
+  try {
+    const result = await runIngestion();
+    await completeScheduledIngestion("success");
+    return result;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Ingestion failed";
+    await completeScheduledIngestion("error", message);
+    throw error;
+  }
+}

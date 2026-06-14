@@ -1,18 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import { verifyIngestSecret } from "@/lib/ingest/auth";
 import { runIngestion } from "@/lib/ingest/pipeline";
 
 export async function GET(request: NextRequest) {
-  const authHeader = request.headers.get("authorization");
-  const cronSecret = process.env.CRON_SECRET;
-
-  if (!cronSecret) {
-    return NextResponse.json({ error: "CRON_SECRET not configured" }, { status: 500 });
-  }
-
-  const token = authHeader?.replace(/^Bearer\s+/i, "");
-  if (token !== cronSecret) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const authError = verifyIngestSecret(request);
+  if (authError) return authError;
 
   try {
     const result = await runIngestion();
