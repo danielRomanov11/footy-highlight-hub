@@ -1,0 +1,20 @@
+name: Security
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  env-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Block committed env files
+        run: |
+          if git ls-files --error-unmatch .env .env.local .env.production 2>/dev/null; then
+            echo "ERROR: Secret env files must not be committed."
+            exit 1
+          fi
+          echo "No secret env files in repo."

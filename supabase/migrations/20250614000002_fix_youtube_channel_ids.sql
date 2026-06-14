@@ -1,0 +1,10 @@
+-- Fix outdated YouTube channel IDs (resolved via @handle lookup)
+update sources set youtube_channel_id = 'UCpcTrCXblq78GZrTUTLWeBw' where slug = 'fifa';
+update sources set youtube_channel_id = 'UCyGa1YEx9ST66rYrJTGIKOw' where slug = 'uefa';
+update sources set youtube_channel_id = 'UCooTLkxcpnTNx6vfOovfBFA' where slug = 'fox-soccer';
+update sources set youtube_channel_id = 'UCG5qGWdu8nIRZqJ_GgDwQ-w' where slug = 'premier-league';
+update sources set youtube_channel_id = 'UCTv-XvfzLX3i4IGWAm4sbmA' where slug = 'laliga';
+update sources set youtube_channel_id = 'UC6UL29enLNe4mqwTfAyeNuw' where slug = 'bundesliga';
+update sources set youtube_channel_id = 'UCBJeMCIeLQos7wacox4hmLQ' where slug = 'serie-a';
+update sources set youtube_channel_id = 'UCQsH5XtIc9hONE1BQjucM0g' where slug = 'ligue-1';
+update sources set youtube_channel_id = 'UCSZbXT5TLLW_i-5W8FZpFsg' where slug = 'mls';
