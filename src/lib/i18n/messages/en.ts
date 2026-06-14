@@ -38,7 +38,7 @@ const en = {
     emptyConfig:
       "Configure Supabase environment variables and run the migration to see highlights.",
     emptyVideos:
-      "No highlights yet. Ingest runs automatically when someone visits the site (about every 2 hours).",
+      "No highlights yet. Ingest runs automatically when someone visits the site.",
   },
   browse: {
     eyebrow: "Competitions",

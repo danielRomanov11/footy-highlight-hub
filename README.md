@@ -13,7 +13,7 @@ A public web app that aggregates **official football highlights** from trusted Y
 ## Architecture
 
 ```
-Site traffic → root layout + client visit hook → POST /api/ingest/run-if-due (every ~2 hours)
+Site traffic → root layout + client visit hook → POST /api/ingest/run-on-visit (full ingest per visit)
   → YouTube adapter (uploads playlist, 1 quota unit/page)
   → Website adapters (FIFA, UEFA, generic)
   → Content classifier (highlight vs full_match)
@@ -58,7 +58,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 YOUTUBE_API_KEY=
 CRON_SECRET=your-random-32-char-secret
-INGEST_INTERVAL_HOURS=2
+INGEST_INTERVAL_HOURS=0
 ```
 
 Optional:
@@ -67,7 +67,7 @@ Optional:
 NEXT_PUBLIC_ENABLE_FULL_MATCHES=true
 ```
 
-Set `INGEST_INTERVAL_HOURS` to change how often traffic can trigger ingest (default `2`).
+Set `INGEST_INTERVAL_HOURS` to throttle ingest (default `0` = every visit; only one run at a time).
 
 Set `NEXT_PUBLIC_ENABLE_FULL_MATCHES=true` when ready to show full matches in the UI (Phase 4).
 
@@ -90,8 +90,8 @@ curl -H "Authorization: Bearer YOUR_CRON_SECRET" http://localhost:3000/api/cron/
 1. Push to GitHub and import the repo in Vercel
 2. Add all env vars from `.env.example` in Vercel project settings
 3. Deploy — no Vercel Cron needed (Hobby-friendly)
-4. Ingest runs in the background when someone visits the site, at most once every `INGEST_INTERVAL_HOURS` (default 2)
-5. Run the `20250614000005_ingest_state.sql` migration in Supabase if upgrading an existing deploy
+4. Ingest runs in the background when someone visits the site (default: every visit; set `INGEST_INTERVAL_HOURS` to throttle)
+5. Run the `20250614000006_ingest_on_visit.sql` migration in Supabase if upgrading an existing deploy
 
 ## API
 
@@ -102,7 +102,8 @@ curl -H "Authorization: Bearer YOUR_CRON_SECRET" http://localhost:3000/api/cron/
 | `GET /api/competitions` | Competitions with seasons |
 | `GET /api/competitions/[slug]/[season]` | Season archive + month summaries |
 | `GET /api/competitions/[slug]/[season]/[month]` | Videos for a month |
-| `POST /api/ingest/run-if-due` | Scheduled ingest if interval elapsed (public; lock prevents abuse) |
+| `POST /api/ingest/run-on-visit` | Full ingest on site visit (public; in-progress lock prevents duplicates) |
+| `POST /api/ingest/run-if-due` | Alias for `run-on-visit` |
 | `GET /api/cron/ingest` | Manual ingest (requires `Authorization: Bearer CRON_SECRET`) |
 
 ## Security
