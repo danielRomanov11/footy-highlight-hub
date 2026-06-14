@@ -38,7 +38,13 @@ const en = {
     emptyConfig:
       "Configure Supabase environment variables and run the migration to see highlights.",
     emptyVideos:
-      "No highlights yet. Ingest runs automatically when someone visits the site.",
+      "No highlights yet. Use Refresh to pull videos from official channels.",
+    refresh: "Refresh highlights",
+    refreshing: "Updating...",
+    refreshSuccess: "Highlights updated.",
+    refreshSuccessNew: "Added {count} new highlights.",
+    refreshError: "Could not refresh highlights. Try again.",
+    refreshInProgress: "An update is already running. Try again shortly.",
   },
   browse: {
     eyebrow: "Competitions",

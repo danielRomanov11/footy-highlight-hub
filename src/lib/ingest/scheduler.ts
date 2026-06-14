@@ -23,15 +23,20 @@ function getIngestIntervalParam(): string {
 
 export type ScheduledIngestSkipReason = "not_due" | "in_progress";
 
-export async function tryStartScheduledIngestion(): Promise<
-  { shouldRun: true } | { shouldRun: false; reason: ScheduledIngestSkipReason }
-> {
+interface StartIngestionOptions {
+  force?: boolean;
+}
+
+export async function tryStartScheduledIngestion(
+  options: StartIngestionOptions = {},
+): Promise<{ shouldRun: true } | { shouldRun: false; reason: ScheduledIngestSkipReason }> {
   const supabase = createServiceClient();
   const intervalHours = getIngestIntervalHours();
   const intervalParam = getIngestIntervalParam();
 
   const { data: acquired, error } = await supabase.rpc("try_acquire_ingest_lock", {
     p_interval: intervalParam,
+    p_force: options.force ?? false,
   });
 
   if (error) throw error;

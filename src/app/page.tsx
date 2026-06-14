@@ -4,6 +4,7 @@ import { EmptyState } from "@/components/empty-state";
 import { FilterBar } from "@/components/filter-bar";
 import { HomeHero } from "@/components/home-hero";
 import { PageHeader } from "@/components/page-header";
+import { RefreshHighlightsButton } from "@/components/refresh-highlights-button";
 import { VideoCard } from "@/components/video-card";
 import { VideoGridSkeleton } from "@/components/video-grid-skeleton";
 import { hasSupabaseConfig } from "@/lib/env";
@@ -83,11 +84,14 @@ export default async function HomePage(props: HomePageProps) {
         <HomeHero />
       </div>
 
-      <PageHeader
-        eyebrow={t.home.eyebrow}
-        title={t.home.title}
-        description={t.home.description}
-      />
+      <div className="mb-10 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+        <PageHeader
+          eyebrow={t.home.eyebrow}
+          title={t.home.title}
+          description={t.home.description}
+        />
+        <RefreshHighlightsButton />
+      </div>
 
       <Suspense fallback={<VideoGridSkeleton count={6} />}>
         <HomeContent {...props} />
