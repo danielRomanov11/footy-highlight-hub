@@ -13,7 +13,7 @@ A public web app that aggregates **official football highlights** from trusted Y
 ## Architecture
 
 ```
-Site traffic → middleware → POST /api/ingest/run-if-due (every ~2 hours)
+Site traffic → root layout + client visit hook → POST /api/ingest/run-if-due (every ~2 hours)
   → YouTube adapter (uploads playlist, 1 quota unit/page)
   → Website adapters (FIFA, UEFA, generic)
   → Content classifier (highlight vs full_match)
@@ -102,7 +102,7 @@ curl -H "Authorization: Bearer YOUR_CRON_SECRET" http://localhost:3000/api/cron/
 | `GET /api/competitions` | Competitions with seasons |
 | `GET /api/competitions/[slug]/[season]` | Season archive + month summaries |
 | `GET /api/competitions/[slug]/[season]/[month]` | Videos for a month |
-| `POST /api/ingest/run-if-due` | Scheduled ingest if interval elapsed (requires `Authorization: Bearer CRON_SECRET`) |
+| `POST /api/ingest/run-if-due` | Scheduled ingest if interval elapsed (public; lock prevents abuse) |
 | `GET /api/cron/ingest` | Manual ingest (requires `Authorization: Bearer CRON_SECRET`) |
 
 ## Security

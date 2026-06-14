@@ -1,33 +1,15 @@
-import { after, NextRequest, NextResponse } from "next/server";
-import { verifyIngestSecret } from "@/lib/ingest/auth";
-import { runScheduledIngestion, tryStartScheduledIngestion } from "@/lib/ingest/scheduler";
+import { NextResponse } from "next/server";
+import { triggerScheduledIngestIfDue } from "@/lib/ingest/trigger";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-export async function POST(request: NextRequest) {
-  const authError = verifyIngestSecret(request);
-  if (authError) return authError;
+export async function POST() {
+  const result = await triggerScheduledIngestIfDue();
 
-  try {
-    const decision = await tryStartScheduledIngestion();
-    if (!decision.shouldRun) {
-      return NextResponse.json({ ok: true, skipped: true, reason: decision.reason });
-    }
-
-    after(async () => {
-      try {
-        await runScheduledIngestion();
-      } catch {
-        // Status is persisted in ingest_state by runScheduledIngestion.
-      }
-    });
-
+  if (result.started) {
     return NextResponse.json({ ok: true, started: true });
-  } catch (error) {
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Scheduler failed" },
-      { status: 500 },
-    );
   }
+
+  return NextResponse.json({ ok: true, skipped: true, reason: result.reason });
 }
